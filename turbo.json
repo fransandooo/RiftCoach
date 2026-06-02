@@ -1,5 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "API_HOST",
+    "API_PORT",
+    "WEB_ORIGIN",
+    "NEXT_PUBLIC_API_BASE_URL"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
@@ -14,6 +21,19 @@
     },
     "test": {
       "dependsOn": ["^test"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:check": {
+      "cache": false
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

@@ -12,7 +12,10 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
-    "format": "prettier --check ."
+    "format": "prettier --check .",
+    "db:generate": "turbo db:generate --filter=@riftcoach/api",
+    "db:migrate": "turbo db:migrate --filter=@riftcoach/api",
+    "db:check": "turbo db:check --filter=@riftcoach/api"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

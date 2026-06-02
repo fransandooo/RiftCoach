@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: riftcoach-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: riftcoach
+      POSTGRES_PASSWORD: riftcoach
+      POSTGRES_DB: riftcoach
+    ports:
+      - "55432:5432"
+    volumes:
+      - riftcoach-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U riftcoach -d riftcoach"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  riftcoach-postgres-data:

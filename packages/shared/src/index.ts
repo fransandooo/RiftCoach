@@ -1,1 +1,1 @@
-export type RiftCoachService = 'web' | 'api';
+export type RiftCoachService = "web" | "api";
