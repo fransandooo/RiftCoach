@@ -166,6 +166,28 @@ The smoke test uses JUNI#MAD on EUW and verifies:
 
 The script intentionally prints only a short PUUID prefix and never prints `RIOT_API_KEY`.
 
+## Analytics engine acceptance test
+
+Phase 4 contains deterministic post-game analytics in `apps/api/src/analytics/`.
+
+Run the analytics-only acceptance test:
+
+```bash
+bun run --cwd apps/api test tests/analytics-engine.test.ts
+```
+
+It verifies fixture matches for:
+
+- KDA, including zero-death games
+- CS/min from lane + neutral CS
+- kill participation, including zero team kills
+- vision score per minute
+- short-game/remake guardrails
+- deterministic mistake flags
+- recent-match aggregates
+- champion aggregates
+- top coach recommendations
+
 ## Environment
 
 Copy `.env.example` to `.env` for local VPS development. The backend requires `DATABASE_URL` before it starts as a real server. Tests that do not need a real database can still run without it.

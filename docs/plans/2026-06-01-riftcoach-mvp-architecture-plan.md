@@ -522,7 +522,7 @@ Verification:
 
 Phase acceptance test:
 
-- Run analytics tests against fixture matches and confirm they produce expected KDA, CS/min, KP, vision flags, champion aggregates, and top coach recommendations.
+- Run `bun run --cwd apps/api test tests/analytics-engine.test.ts` against fixture matches and confirm it produces expected KDA, CS/min, KP, vision flags, champion aggregates, top coach recommendations, and edge-case behavior for zero deaths, zero team kills, short games, and remakes.
 
 ### Phase 5: Backend Refresh Flow
 
