@@ -17,8 +17,8 @@ Tech Stack Proposal:
 - Auth: start with single-user local profile or simple auth; defer multi-user auth unless needed
 - External API: Riot Games API
 - Deployment target: Francisco VPS under /home/francisco/projects, separate from Hermes
-- Deployment direction: container-first; start compatible with plain Docker Compose and keep the door open for Coolify or Dokploy
-- Observability direction: self-hosted metrics/logs/traces stack such as Grafana, Loki, and OpenTelemetry when more apps run on the VPS
+- Deployment direction: container-first; use Docker Compose for local/dev shape and prefer Dokploy for VPS deployment once the app is ready to run like a small real product
+- Observability direction: self-hosted metrics/logs/traces stack with Grafana, Prometheus, Loki, OpenTelemetry Collector, and Tempo; design it as shared VPS infrastructure for multiple future projects
 
 ---
 
@@ -423,6 +423,10 @@ Verification:
 - Plan file exists
 - File owner is francisco:francisco
 
+Phase acceptance test:
+
+- Run `stat -c "%U:%G %n" docs/plans/2026-06-01-riftcoach-mvp-architecture-plan.md` and confirm it prints `francisco:francisco`.
+
 ### Phase 1: TurboRepo Monorepo and Frontend/Backend Skeleton
 
 Objective: create a working TurboRepo monorepo with Bun workspaces, a Next.js frontend, and a Bun + Elysia backend.
@@ -437,6 +441,7 @@ Tasks:
 6. Add basic Elysia health route, e.g. GET /health
 7. Add shared formatting/linting/test scripts at repo level through TurboRepo
 8. Add README with local commands for frontend, backend, and database
+9. Document SSH port forwarding for viewing VPS dev servers from Francisco's laptop
 
 Verification:
 
@@ -447,6 +452,10 @@ Verification:
 - frontend can call backend health endpoint
 - lint/build/test scripts pass where configured
 
+Phase acceptance test:
+
+- Run `bun run dev`, open `http://localhost:3000` through SSH port forwarding, and confirm the homepage shows backend status `ok (riftcoach-api)`.
+
 ### Phase 2: Backend Database Foundation
 
 Objective: persist player profile and match data from the Bun + Elysia API.
@@ -455,16 +464,21 @@ Tasks:
 
 1. Add Drizzle ORM and PostgreSQL driver to apps/api
 2. Configure DATABASE_URL in backend env validation
-3. Define schema for PlayerProfile, RankedSnapshot, Match, MatchParticipant, CoachInsight
-4. Create first migration
-5. Add backend database client
-6. Add seed/dev reset command if useful
+3. Ensure backend scripts load the root `.env` even when Turbo runs them from `apps/api`
+4. Define schema for PlayerProfile, RankedSnapshot, Match, MatchParticipant, CoachInsight
+5. Create first migration
+6. Add backend database client
+7. Add seed/dev reset command if useful
 
 Verification:
 
 - drizzle migration generation succeeds
 - migration applies
 - backend DB connection test passes
+
+Phase acceptance test:
+
+- Run `docker compose up -d postgres`, `bun run db:migrate`, and `bun run db:check`; confirm output includes `Database connection OK`.
 
 ### Phase 3: Riot API Client
 
@@ -484,6 +498,10 @@ Verification:
 - Unit tests for URL construction and error mapping
 - Optional live smoke test only if RIOT_API_KEY is present
 
+Phase acceptance test:
+
+- With mocked Riot responses, run the Riot client test suite and confirm account lookup, ranked fetch, match ID fetch, match detail fetch, and 429 handling pass. If RIOT_API_KEY is present, run one live lookup smoke test against Francisco's account.
+
 ### Phase 4: Analytics Engine
 
 Objective: compute metrics and mistake flags from stored match data.
@@ -500,6 +518,10 @@ Verification:
 
 - Unit tests with fixture matches
 - Edge cases for zero deaths, zero team kills, short games, remakes
+
+Phase acceptance test:
+
+- Run analytics tests against fixture matches and confirm they produce expected KDA, CS/min, KP, vision flags, champion aggregates, and top coach recommendations.
 
 ### Phase 5: Backend Refresh Flow
 
@@ -521,6 +543,10 @@ Verification:
 - Re-running refresh does not duplicate matches
 - UI shows imported data
 
+Phase acceptance test:
+
+- Trigger manual refresh twice for the same player. Confirm the first run imports recent matches and the second run reports skipped existing matches without duplicate `matches` rows.
+
 ### Phase 6: Dashboard UI
 
 Objective: make the MVP useful visually.
@@ -539,6 +565,10 @@ Verification:
 - Dashboard works after live refresh
 - Build and lint pass
 
+Phase acceptance test:
+
+- Seed or import at least 10 matches, open `/dashboard`, and confirm recent record, average KDA, CS/min, vision, recent matches, and champion summary render without console/API errors.
+
 ### Phase 7: Match Detail and Coach Pages
 
 Objective: expose review and recommendations.
@@ -556,27 +586,96 @@ Verification:
 - Each insight links back to concrete match/stat evidence
 - No recommendation appears without evidence
 
-### Phase 8: Deployment on VPS
+Phase acceptance test:
 
-Objective: run RiftCoach frontend and backend separately from Hermes.
+- Open one match detail and the coach page. Confirm every shown mistake/recommendation includes concrete evidence such as matchId, champion, stat value, threshold, or recent-match count.
+
+### Phase 8: Containerized Production Shape
+
+Objective: make RiftCoach production-ready as a containerized app before handing it to a platform.
 
 Tasks:
 
-1. Add production env files on VPS, not committed
-2. Configure PostgreSQL database
-3. Build frontend and backend
-4. Run backend API as its own process/service
-5. Run frontend as its own process/service
-6. Add reverse proxy routes, e.g. web domain plus /api or api subdomain
-7. Add backup note for database
+1. Add Dockerfile for apps/api
+2. Add Dockerfile for apps/web
+3. Add production Docker Compose for web, api, postgres, and network wiring
+4. Use env files/secrets that are not committed
+5. Add healthchecks for api and web
+6. Add database backup/restore notes
+7. Keep Hermes root setup untouched
 
 Verification:
 
-- Frontend reachable on configured host/port
-- Backend /health reachable locally and through reverse proxy if exposed
-- Frontend can call backend API
-- Both processes restart on failure/reboot
-- Hermes root setup remains untouched
+- Containers build successfully
+- `api` can reach `postgres` through the internal Docker network
+- `web` can reach `api` through the configured API URL
+- Healthchecks pass
+
+Phase acceptance test:
+
+- Run the production-like compose stack, then confirm `curl http://localhost:<web-port>` returns the frontend and `curl http://localhost:<api-port>/health` returns `riftcoach-api`.
+
+### Phase 9: Dokploy Deployment on VPS
+
+Objective: deploy RiftCoach like a small real product on Francisco's VPS using Dokploy as the preferred platform.
+
+Tasks:
+
+1. Install/configure Dokploy outside the Hermes root setup
+2. Connect the GitHub repository using the existing SSH/repo flow
+3. Create Dokploy apps/services for web, api, and postgres or attach an external postgres service
+4. Configure domains, HTTPS, env vars, and internal service URLs
+5. Configure deploy strategy from the main branch
+6. Configure restart policy and basic resource limits
+7. Document rollback and redeploy steps
+
+Verification:
+
+- Dokploy can build and deploy from GitHub
+- Frontend is reachable through the configured public domain
+- Backend `/health` is reachable through internal route and, if intended, public route
+- Frontend can call backend in the deployed environment
+- Reboot/redeploy keeps services healthy
+
+Phase acceptance test:
+
+- Push a harmless UI change to main, trigger/observe Dokploy deploy, and confirm the public domain updates while `/health` remains healthy.
+
+### Phase 10: VPS Observability Stack
+
+Objective: add self-hosted observability suitable for multiple future VPS projects, not only RiftCoach.
+
+Recommended stack:
+
+- Grafana for dashboards
+- Prometheus for metrics scraping/storage
+- Loki for logs
+- Tempo for traces
+- OpenTelemetry Collector as the ingestion/router layer
+- Optional later: Grafana Alloy if it becomes the simpler collector/agent choice for the VPS
+
+Tasks:
+
+1. Create a shared observability Docker Compose/Dokploy project separate from RiftCoach
+2. Configure Prometheus scrape targets for RiftCoach API and platform services
+3. Configure Loki log ingestion for containers
+4. Configure Tempo trace ingestion
+5. Add OpenTelemetry instrumentation hooks to apps/api first
+6. Add structured logging to apps/api
+7. Add basic Grafana dashboards for uptime, request rate, errors, latency, DB connectivity, and container resource usage
+8. Add alerting later only after dashboards are stable
+
+Verification:
+
+- Grafana opens from the admin-only URL
+- Prometheus receives metrics
+- Loki receives RiftCoach logs
+- Tempo receives at least one API trace
+- Dashboards show live data after calling the app
+
+Phase acceptance test:
+
+- Call the deployed API `/health` and one real RiftCoach endpoint, then confirm in Grafana that the request appears in metrics, logs, and traces.
 
 ---
 
@@ -617,7 +716,7 @@ Focus on:
 
 1. Riot region/platform for Francisco account, e.g. EUW, LAN, LAS, NA, etc.
 2. Whether MVP is single-user only or should include login from day one.
-3. Whether to use Docker for frontend + backend + Postgres or native services on VPS.
+3. Which domain/subdomain layout to use for Dokploy deployment.
 4. Whether to create GitHub repo immediately using github.com-hermes SSH alias.
 5. Whether to include AI-generated natural-language coaching in MVP or keep deterministic rules first.
 6. Whether API is exposed as /api behind the same domain or as a separate api.riftcoach-style subdomain.
@@ -628,7 +727,9 @@ Recommended defaults:
 - Deterministic coaching first
 - Next.js frontend + Bun/Elysia backend + PostgreSQL + Drizzle
 - Manual backend refresh first
-- Docker Compose if Francisco wants easy deployment isolation; otherwise native systemd services are fine
+- Docker Compose for local/dev and production-like container testing
+- Dokploy as the preferred VPS deployment platform instead of native systemd services
+- Shared observability stack for the VPS: Grafana + Prometheus + Loki + OpenTelemetry Collector + Tempo
 
 ---
 

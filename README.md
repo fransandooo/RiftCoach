@@ -9,8 +9,8 @@ RiftCoach is a post-game League of Legends coaching web app. It imports recent R
 - Backend: Bun + Elysia
 - Database: PostgreSQL
 - ORM: Drizzle
-- Future deployment direction: Docker/container-first, compatible with plain Docker Compose, Coolify, or Dokploy
-- Future observability direction: self-hosted Grafana/Loki/OpenTelemetry stack
+- Future deployment direction: Docker/container-first, with Dokploy as the preferred VPS app platform once RiftCoach moves beyond local dev
+- Future observability direction: self-hosted Grafana, Loki, Prometheus, OpenTelemetry, and Tempo stack
 
 ## Repository layout
 
@@ -44,6 +44,14 @@ Use this development database URL:
 export DATABASE_URL=postgres://riftcoach:***@localhost:55432/riftcoach
 ```
 
+Create the local development env file:
+
+```bash
+cp .env.example .env
+```
+
+The backend scripts load the root `.env` explicitly from `apps/api`, so `bun run dev`, `bun run db:migrate`, and `bun run db:check` work from the repository root.
+
 Run migrations:
 
 ```bash
@@ -65,7 +73,7 @@ bun run dev
 Run only the backend:
 
 ```bash
-DATABASE_URL=postgres://riftcoach:***@localhost:55432/riftcoach bun run --cwd apps/api dev
+bun run --cwd apps/api dev
 ```
 
 Run only the frontend:
@@ -80,6 +88,32 @@ Default local URLs:
 - Backend: http://localhost:4000
 - Backend health: http://localhost:4000/health
 - PostgreSQL: localhost:55432
+
+## Viewing the VPS dev app from a laptop
+
+When the app runs on the VPS, `localhost:3000` on the VPS is not automatically the same as `localhost:3000` on your laptop.
+
+Recommended development approach: SSH port forwarding.
+
+From your laptop:
+
+```bash
+ssh -L 3000:localhost:3000 -L 4000:localhost:4000 francisco@srv1191876
+```
+
+Then, inside that SSH session on the VPS:
+
+```bash
+cd ~/projects/RiftCoach
+bun run dev
+```
+
+Now open these URLs on the laptop:
+
+- Frontend: http://localhost:3000
+- Backend health: http://localhost:4000/health
+
+Why this works: the SSH tunnel maps your laptop ports 3000 and 4000 to the VPS ports 3000 and 4000. Without the tunnel, your laptop's `localhost` means your laptop, not the VPS.
 
 ## Scripts
 
@@ -104,7 +138,7 @@ bun run --cwd apps/api db:check
 
 ## Environment
 
-Copy `.env.example` to local environment files as needed. The backend requires `DATABASE_URL` before it starts as a real server. Tests that do not need a real database can still run without it.
+Copy `.env.example` to `.env` for local VPS development. The backend requires `DATABASE_URL` before it starts as a real server. Tests that do not need a real database can still run without it.
 
 Required backend variables:
 
