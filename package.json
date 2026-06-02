@@ -16,7 +16,8 @@
     "db:generate": "turbo db:generate --filter=@riftcoach/api",
     "db:migrate": "turbo db:migrate --filter=@riftcoach/api",
     "db:check": "turbo db:check --filter=@riftcoach/api",
-    "riot:smoke": "bun run --cwd apps/api riot:smoke"
+    "riot:smoke": "bun run --cwd apps/api riot:smoke",
+    "refresh:acceptance": "bun run --cwd apps/api refresh:acceptance"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

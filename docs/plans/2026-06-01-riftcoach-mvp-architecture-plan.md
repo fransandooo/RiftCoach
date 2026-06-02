@@ -546,7 +546,7 @@ Verification:
 
 Phase acceptance test:
 
-- Trigger manual refresh twice for the same player. Confirm the first run imports recent matches and the second run reports skipped existing matches without duplicate `matches` rows.
+- Run `bun run refresh:acceptance` with a valid Riot development key. It triggers manual refresh twice for JUNI#MAD through the Elysia app, confirms the first run imports any not-yet-stored recent matches, confirms the second run reports skipped existing matches, and verifies the second run adds `0` duplicate `matches` rows. The `/setup` and `/dashboard` frontend pages display setup/refresh status counts for manual UI verification.
 
 ### Phase 6: Dashboard UI
 

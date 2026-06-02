@@ -188,6 +188,39 @@ It verifies fixture matches for:
 - champion aggregates
 - top coach recommendations
 
+## Backend refresh flow acceptance test
+
+Phase 5 connects Riot API, PostgreSQL, analytics, and Elysia endpoints.
+
+Available backend endpoints:
+
+- `POST /players/setup`
+- `POST /players/:playerProfileId/refresh`
+- `GET /players/:playerProfileId/refresh/status`
+
+Run the live acceptance test with the configured `.env` Riot development key:
+
+```bash
+bun run refresh:acceptance
+```
+
+The acceptance script uses JUNI#MAD on EUW, triggers manual refresh twice for
+the same player, and prints:
+
+- match rows before refresh
+- match rows after first refresh
+- match rows after second refresh
+- first refresh imported/skipped counts
+- second refresh imported/skipped counts
+- duplicate check: rows added by the second refresh
+
+Expected behavior: the first refresh imports any not-yet-stored recent matches,
+the second refresh reports those matches as skipped, and
+`secondRefreshAddedRows` stays `0`.
+
+The frontend `/setup` page can call setup + manual refresh, and `/dashboard`
+can display the latest refresh status/imported/skipped counts for polling.
+
 ## Environment
 
 Copy `.env.example` to `.env` for local VPS development. The backend requires `DATABASE_URL` before it starts as a real server. Tests that do not need a real database can still run without it.
