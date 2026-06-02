@@ -125,6 +125,7 @@ bun run format
 bun run db:generate
 bun run db:migrate
 bun run db:check
+bun run riot:smoke
 ```
 
 Backend-specific database scripts:
@@ -134,7 +135,36 @@ bun run --cwd apps/api db:generate
 bun run --cwd apps/api db:migrate
 bun run --cwd apps/api db:studio
 bun run --cwd apps/api db:check
+bun run --cwd apps/api riot:smoke
 ```
+
+## Riot API development smoke test
+
+Phase 3 includes a Riot API client for account lookup, summoner lookup, ranked entries, match IDs, and match detail.
+
+For local VPS development, add a development key from https://developer.riotgames.com/ to `.env`:
+
+```bash
+RIOT_API_KEY=RGAPI-your-development-key
+```
+
+Development keys expire every 24 hours. If the smoke test starts returning 403 after previously working, regenerate the key in the Riot Developer Portal and update `.env`.
+
+Run the smoke test:
+
+```bash
+bun run riot:smoke
+```
+
+The smoke test uses JUNI#MAD on EUW and verifies:
+
+- account lookup by Riot ID through `europe`
+- summoner lookup by PUUID through `euw1`
+- ranked entries by PUUID through `euw1`
+- recent match IDs through `europe`
+- one match detail through `europe`
+
+The script intentionally prints only a short PUUID prefix and never prints `RIOT_API_KEY`.
 
 ## Environment
 
@@ -144,6 +174,7 @@ Required backend variables:
 
 ```bash
 DATABASE_URL=postgres://riftcoach:***@localhost:55432/riftcoach
+RIOT_API_KEY=RGAPI-your-development-key
 API_HOST=0.0.0.0
 API_PORT=4000
 WEB_ORIGIN=http://localhost:3000

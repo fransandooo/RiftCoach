@@ -154,8 +154,9 @@ Account endpoints:
 
 Summoner/League endpoints:
 
-- Get summoner profile if needed
-- Get ranked entries for tier, rank, LP, wins, losses
+- Get summoner profile by PUUID if needed for profile icon, revision date, or summoner level
+- Get ranked entries by PUUID for tier, rank, LP, wins, losses
+- Note: live Riot smoke testing showed Summoner V4 by PUUID no longer returns encrypted summoner id in the response, so ranked lookup should use League V4 `entries/by-puuid/{puuid}` instead of the older `entries/by-summoner/{encryptedSummonerId}` flow
 
 Match endpoints:
 

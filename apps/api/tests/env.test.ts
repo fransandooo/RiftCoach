@@ -11,16 +11,26 @@ describe("API environment validation", () => {
     ).toThrow("DATABASE_URL");
   });
 
-  it("parses database URL and default server settings", () => {
+  it("parses database URL, Riot key, and default server settings", () => {
     const env = parseApiEnv({
-      DATABASE_URL: "postgres://riftcoach:riftcoach@localhost:5432/riftcoach",
+      DATABASE_URL: "postgres://riftcoach:***@localhost:5432/riftcoach",
+      RIOT_API_KEY: "RGAPI-test",
     });
 
     expect(env.DATABASE_URL).toBe(
-      "postgres://riftcoach:riftcoach@localhost:5432/riftcoach",
+      "postgres://riftcoach:***@localhost:5432/riftcoach",
     );
+    expect(env.RIOT_API_KEY).toBe("RGAPI-test");
     expect(env.API_HOST).toBe("0.0.0.0");
     expect(env.API_PORT).toBe(4000);
     expect(env.WEB_ORIGIN).toBe("http://localhost:3000");
+  });
+
+  it("requires RIOT_API_KEY for Riot-backed API calls", () => {
+    expect(() =>
+      parseApiEnv({
+        DATABASE_URL: "postgres://riftcoach:***@localhost:5432/riftcoach",
+      }),
+    ).toThrow("RIOT_API_KEY");
   });
 });
