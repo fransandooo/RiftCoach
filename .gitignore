@@ -25,3 +25,6 @@ build/
 
 # turbo
 .turbo/
+
+# TypeScript
+*.tsbuildinfo
