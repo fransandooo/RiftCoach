@@ -126,6 +126,8 @@ bun run db:generate
 bun run db:migrate
 bun run db:check
 bun run riot:smoke
+bun run refresh:acceptance
+bun run dashboard:acceptance
 ```
 
 Backend-specific database scripts:
@@ -136,6 +138,8 @@ bun run --cwd apps/api db:migrate
 bun run --cwd apps/api db:studio
 bun run --cwd apps/api db:check
 bun run --cwd apps/api riot:smoke
+bun run --cwd apps/api refresh:acceptance
+bun run --cwd apps/api dashboard:acceptance
 ```
 
 ## Riot API development smoke test
@@ -220,6 +224,38 @@ the second refresh reports those matches as skipped, and
 
 The frontend `/setup` page can call setup + manual refresh, and `/dashboard`
 can display the latest refresh status/imported/skipped counts for polling.
+
+## Dashboard UI acceptance test
+
+Phase 6 adds the dashboard data endpoint and a useful `/dashboard` UI.
+
+Backend dashboard endpoint:
+
+- `GET /players/:playerProfileId/dashboard`
+
+Run the live dashboard acceptance test:
+
+```bash
+bun run dashboard:acceptance
+```
+
+It uses JUNI#MAD, ensures up to 10 recent matches are imported, then confirms
+the dashboard payload includes:
+
+- recent record and win rate
+- average KDA
+- average CS/min
+- average kill participation
+- average vision/min
+- recent matches table data
+- win/loss trend data
+- champion summary data
+- coach recommendations
+
+Manual UI check: open `/dashboard` after running `/setup` or
+`bun run dashboard:acceptance`. The page should render summary cards, recent
+matches, win/loss trend, champion cards, loading/empty/error states, and no
+browser console/API errors.
 
 ## Environment
 

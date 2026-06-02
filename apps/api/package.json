@@ -14,7 +14,8 @@
     "db:studio": "bun --env-file=../../.env drizzle-kit studio",
     "db:check": "bun --env-file=../../.env src/db/check.ts",
     "riot:smoke": "bun --env-file=../../.env src/riot/smoke.ts",
-    "refresh:acceptance": "bun --env-file=../../.env src/refresh/acceptance.ts"
+    "refresh:acceptance": "bun --env-file=../../.env src/refresh/acceptance.ts",
+    "dashboard:acceptance": "bun --env-file=../../.env src/dashboard/acceptance.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.3.3",

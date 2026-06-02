@@ -568,7 +568,7 @@ Verification:
 
 Phase acceptance test:
 
-- Seed or import at least 10 matches, open `/dashboard`, and confirm recent record, average KDA, CS/min, vision, recent matches, and champion summary render without console/API errors.
+- Run `bun run dashboard:acceptance` to ensure JUNI#MAD has at least 10 imported matches and the dashboard endpoint returns recent record, average KDA, CS/min, kill participation, vision/min, recent matches, win/loss trend, champion summary, and coach recommendations. Then open `/dashboard` and confirm the redesigned UI renders those sections without console/API errors.
 
 ### Phase 7: Match Detail and Coach Pages
 

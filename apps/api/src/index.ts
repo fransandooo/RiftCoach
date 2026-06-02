@@ -1,6 +1,9 @@
 import { cors } from "@elysiajs/cors";
 import { Elysia, t } from "elysia";
 import { parseApiEnv } from "./config/env";
+import { createPostgresDashboardRepository } from "./dashboard/repository";
+import { createDashboardService } from "./dashboard/service";
+import type { DashboardService } from "./dashboard/types";
 import { createPostgresRefreshRepository } from "./refresh/repository";
 import { createRefreshService } from "./refresh/service";
 import type { RefreshService } from "./refresh/types";
@@ -10,6 +13,7 @@ const defaultWebOrigin = "http://localhost:3000";
 
 type AppDependencies = {
   refreshService?: RefreshService;
+  dashboardService?: DashboardService;
 };
 
 function getDefaultRefreshService() {
@@ -20,8 +24,14 @@ function getDefaultRefreshService() {
   });
 }
 
+function getDefaultDashboardService() {
+  return createDashboardService(createPostgresDashboardRepository());
+}
+
 export function createApp(dependencies: AppDependencies = {}) {
   let defaultRefreshService: RefreshService | undefined;
+  let defaultDashboardService: DashboardService | undefined;
+
   const getRefreshService = () => {
     if (dependencies.refreshService) {
       return dependencies.refreshService;
@@ -29,6 +39,15 @@ export function createApp(dependencies: AppDependencies = {}) {
 
     defaultRefreshService ??= getDefaultRefreshService();
     return defaultRefreshService;
+  };
+
+  const getDashboardService = () => {
+    if (dependencies.dashboardService) {
+      return dependencies.dashboardService;
+    }
+
+    defaultDashboardService ??= getDefaultDashboardService();
+    return defaultDashboardService;
   };
 
   return new Elysia()
@@ -98,6 +117,21 @@ export function createApp(dependencies: AppDependencies = {}) {
         params.playerProfileId,
       );
       return { refresh };
+    })
+    .get("/players/:playerProfileId/dashboard", async ({ params }) => {
+      const dashboard = await getDashboardService().getPlayerDashboard(
+        params.playerProfileId,
+      );
+      const refresh = await getRefreshService().getRefreshStatus(
+        params.playerProfileId,
+      );
+
+      return {
+        dashboard: {
+          ...dashboard,
+          refresh: dashboard.refresh ?? refresh,
+        },
+      };
     });
 }
 
