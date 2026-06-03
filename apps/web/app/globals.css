@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -11,24 +11,13 @@
 }
 
 html {
-  background: #08090a;
+  background: #eef2f7;
 }
 
 body {
   margin: 0;
-  background:
-    radial-gradient(
-      circle at 20% 0%,
-      rgba(94, 106, 210, 0.18),
-      transparent 32rem
-    ),
-    radial-gradient(
-      circle at 80% 10%,
-      rgba(16, 185, 129, 0.08),
-      transparent 28rem
-    ),
-    #08090a;
-  color: #f7f8f8;
+  background: #eef2f7;
+  color: #202d37;
   font-family:
     Inter,
     ui-sans-serif,

@@ -21,21 +21,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="min-h-screen bg-[#08090a] text-slate-100">
-          <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#08090a]/85 backdrop-blur-xl">
-            <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="min-h-screen bg-[#eef2f7] text-[#202d37]">
+          <header className="sticky top-0 z-40 border-b border-[#dbe3ef] bg-white/90 backdrop-blur-xl">
+            <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
               <Link className="group flex items-center gap-3" href="/">
-                <span className="grid h-8 w-8 place-items-center rounded-lg border border-indigo-300/20 bg-indigo-400/10 text-sm font-semibold text-indigo-200 shadow-lg shadow-indigo-950/30">
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#5383e8] text-sm font-black text-white shadow-sm">
                   RC
                 </span>
-                <span className="text-sm font-medium tracking-[-0.02em] text-slate-50 group-hover:text-indigo-200">
+                <span className="text-base font-bold tracking-[-0.02em] text-[#202d37] group-hover:text-[#5383e8]">
                   RiftCoach
                 </span>
               </Link>
-              <div className="flex gap-1 rounded-full border border-white/[0.06] bg-white/[0.025] p-1 text-sm text-slate-400">
+              <div className="flex gap-1 rounded-lg border border-[#dbe3ef] bg-[#f7f9fc] p-1 text-sm font-semibold text-[#758592]">
                 {navItems.map(([label, href]) => (
                   <Link
-                    className="rounded-full px-3 py-1.5 transition hover:bg-white/[0.05] hover:text-slate-100"
+                    className="rounded-md px-3 py-1.5 transition hover:bg-white hover:text-[#5383e8] hover:shadow-sm"
                     href={href}
                     key={href}
                   >
@@ -45,7 +45,7 @@ export default function RootLayout({
               </div>
             </nav>
           </header>
-          <main className="mx-auto max-w-7xl px-6 py-8 md:py-10">
+          <main className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-6">
             {children}
           </main>
         </div>
