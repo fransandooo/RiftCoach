@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { getChampionIconPath } from "../../lib/champion-icons";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -109,6 +111,10 @@ function queueLabel(queueId: number) {
   return `Queue ${queueId}`;
 }
 
+function isRemakeMatch(match: { gameDurationSeconds: number }) {
+  return match.gameDurationSeconds < 300;
+}
+
 export default function DashboardPage() {
   const [playerProfileId, setPlayerProfileId] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<PlayerDashboard | null>(null);
@@ -118,6 +124,14 @@ export default function DashboardPage() {
   const recentRecord = useMemo(() => {
     if (!dashboard) return "0W 0L";
     return `${dashboard.summary.wins}W ${dashboard.summary.losses}L`;
+  }, [dashboard]);
+
+  const remakeMatchIds = useMemo(() => {
+    return new Set(
+      dashboard?.recentMatches
+        .filter((match) => isRemakeMatch(match))
+        .map((match) => match.matchId) ?? [],
+    );
   }, [dashboard]);
 
   async function loadDashboard(profileId: string) {
@@ -202,7 +216,7 @@ export default function DashboardPage() {
   return (
     <PageShell
       title={dashboard.playerProfile.riotId}
-      subtitle="Post-game profile overview inspired by OP.GG match history patterns."
+      subtitle="Recent matches, champion patterns, and coaching signals from your stored Riot data."
       action={
         <button
           className="rounded-md bg-[#5383e8] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#4171d6]"
@@ -219,7 +233,10 @@ export default function DashboardPage() {
             recentRecord={recentRecord}
             summary={dashboard.summary}
           />
-          <RecentFormCard trend={dashboard.winLossTrend} />
+          <RecentFormCard
+            remakeMatchIds={remakeMatchIds}
+            trend={dashboard.winLossTrend}
+          />
           <ChampionPanel champions={dashboard.championSummary} />
         </aside>
 
@@ -327,25 +344,37 @@ function OverviewCard({
   );
 }
 
-function RecentFormCard({ trend }: { trend: DashboardTrendPoint[] }) {
+function RecentFormCard({
+  remakeMatchIds,
+  trend,
+}: {
+  remakeMatchIds: Set<string>;
+  trend: DashboardTrendPoint[];
+}) {
   return (
     <section className="rounded-xl border border-[#dbe3ef] bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold">Recent form</p>
-          <p className="mt-1 text-xs text-[#758592]">Oldest to newest</p>
+          <p className="mt-1 text-xs text-[#758592]">
+            Oldest to newest · R = remake
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {trend.map((point) => (
-          <span
-            className={`grid h-8 w-8 place-items-center rounded text-xs font-bold text-white shadow-sm ${point.win ? "bg-[#5383e8]" : "bg-[#e84057]"}`}
-            key={point.matchId}
-            title={`${point.championName} · ${point.win ? "Win" : "Loss"}`}
-          >
-            {point.win ? "W" : "L"}
-          </span>
-        ))}
+        {trend.map((point) => {
+          const isRemake = remakeMatchIds.has(point.matchId);
+
+          return (
+            <span
+              className={`grid h-8 w-8 place-items-center rounded text-xs font-bold text-white shadow-sm ${isRemake ? "bg-[#8b98a5]" : point.win ? "bg-[#5383e8]" : "bg-[#e84057]"}`}
+              key={point.matchId}
+              title={`${point.championName} · ${isRemake ? "Remake" : point.win ? "Win" : "Loss"}`}
+            >
+              {isRemake ? "R" : point.win ? "W" : "L"}
+            </span>
+          );
+        })}
       </div>
     </section>
   );
@@ -420,7 +449,7 @@ function MatchHistory({ matches }: { matches: DashboardRecentMatch[] }) {
         <div>
           <h2 className="text-lg font-bold text-[#202d37]">Match history</h2>
           <p className="text-sm text-[#758592]">
-            OP.GG-style compact post-game cards
+            Compact post-game cards with core lane and teamfight metrics
           </p>
         </div>
       </div>
@@ -433,10 +462,18 @@ function MatchHistory({ matches }: { matches: DashboardRecentMatch[] }) {
 }
 
 function MatchCard({ match }: { match: DashboardRecentMatch }) {
-  const resultClasses = match.win
-    ? "border-[#b8cdfa] bg-[#ecf2ff]"
-    : "border-[#f1c6cc] bg-[#fff1f3]";
-  const resultText = match.win ? "text-[#5383e8]" : "text-[#e84057]";
+  const isRemake = isRemakeMatch(match);
+  const resultClasses = isRemake
+    ? "border-[#d6dde6] bg-[#f7f9fc]"
+    : match.win
+      ? "border-[#b8cdfa] bg-[#ecf2ff]"
+      : "border-[#f1c6cc] bg-[#fff1f3]";
+  const resultText = isRemake
+    ? "text-[#758592]"
+    : match.win
+      ? "text-[#5383e8]"
+      : "text-[#e84057]";
+  const resultLabel = isRemake ? "Remake" : match.win ? "Victory" : "Defeat";
 
   return (
     <article
@@ -444,9 +481,7 @@ function MatchCard({ match }: { match: DashboardRecentMatch }) {
     >
       <div className="grid gap-3 p-4 md:grid-cols-[110px_1.25fr_150px_170px] md:items-center">
         <div>
-          <p className={`text-sm font-bold ${resultText}`}>
-            {match.win ? "Victory" : "Defeat"}
-          </p>
+          <p className={`text-sm font-bold ${resultText}`}>{resultLabel}</p>
           <p className="mt-1 text-xs font-medium text-[#758592]">
             {queueLabel(match.queueId)}
           </p>
@@ -456,6 +491,11 @@ function MatchCard({ match }: { match: DashboardRecentMatch }) {
           <p className="mt-2 text-xs font-semibold text-[#758592]">
             {formatDuration(match.gameDurationSeconds)}
           </p>
+          {isRemake ? (
+            <span className="mt-2 inline-flex rounded bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#758592] ring-1 ring-[#d6dde6]">
+              Short game
+            </span>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-3">
@@ -596,7 +636,21 @@ function ChampionAvatar({
   size?: "sm" | "md";
 }) {
   const initials = name.slice(0, 2).toUpperCase();
+  const iconPath = getChampionIconPath(name);
   const dimensions = size === "sm" ? "h-10 w-10 text-xs" : "h-14 w-14 text-sm";
+
+  if (iconPath) {
+    return (
+      <Image
+        alt={`${name} champion icon`}
+        className={`shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white ${dimensions}`}
+        height={size === "sm" ? 40 : 56}
+        loading="eager"
+        src={iconPath}
+        width={size === "sm" ? 40 : 56}
+      />
+    );
+  }
 
   return (
     <div

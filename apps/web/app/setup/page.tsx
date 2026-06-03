@@ -42,7 +42,7 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 export default function SetupPage() {
   const [gameName, setGameName] = useState("JUNI");
   const [tagLine, setTagLine] = useState("MAD");
-  const [count, setCount] = useState(2);
+  const [count, setCount] = useState(10);
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile | null>(
     null,
   );
@@ -90,41 +90,47 @@ export default function SetupPage() {
   }
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">
-          Phase 5
+    <section className="mx-auto max-w-5xl space-y-5 text-[#202d37]">
+      <div className="rounded-xl border border-[#dbe3ef] bg-white p-6 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5383e8]">
+          Player setup
         </p>
-        <h1 className="text-3xl font-bold">Player setup & manual refresh</h1>
-        <p className="max-w-2xl text-slate-300">
-          Connect your Riot ID, trigger a backend refresh, and store recent
+        <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em]">
+          Connect your Riot ID
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#52616d]">
+          Save a Riot profile, trigger a backend refresh, and store recent
           post-game data in PostgreSQL through the Bun + Elysia API.
         </p>
       </div>
 
-      <div className="grid gap-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-5 md:grid-cols-4">
+      <div className="grid gap-4 rounded-xl border border-[#dbe3ef] bg-white p-5 shadow-sm md:grid-cols-4">
         <label className="space-y-2">
-          <span className="text-sm text-slate-400">Game name</span>
+          <span className="text-sm font-semibold text-[#52616d]">
+            Game name
+          </span>
           <input
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white"
+            className="w-full rounded-md border border-[#dbe3ef] bg-[#f7f9fc] px-3 py-2 text-[#202d37] outline-none transition focus:border-[#5383e8] focus:bg-white"
             value={gameName}
             onChange={(event) => setGameName(event.target.value)}
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-400">Tag line</span>
+          <span className="text-sm font-semibold text-[#52616d]">Tag line</span>
           <input
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white"
+            className="w-full rounded-md border border-[#dbe3ef] bg-[#f7f9fc] px-3 py-2 text-[#202d37] outline-none transition focus:border-[#5383e8] focus:bg-white"
             value={tagLine}
             onChange={(event) => setTagLine(event.target.value)}
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm text-slate-400">Recent matches</span>
+          <span className="text-sm font-semibold text-[#52616d]">
+            Recent matches
+          </span>
           <input
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-white"
+            className="w-full rounded-md border border-[#dbe3ef] bg-[#f7f9fc] px-3 py-2 text-[#202d37] outline-none transition focus:border-[#5383e8] focus:bg-white"
             min={1}
             max={20}
             type="number"
@@ -134,7 +140,7 @@ export default function SetupPage() {
         </label>
 
         <button
-          className="self-end rounded-lg bg-emerald-400 px-4 py-2 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+          className="self-end rounded-md bg-[#5383e8] px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-[#4171d6] disabled:cursor-not-allowed disabled:opacity-60"
           disabled={isLoading}
           onClick={handleSetupAndRefresh}
         >
@@ -143,18 +149,18 @@ export default function SetupPage() {
       </div>
 
       {error ? (
-        <pre className="overflow-auto rounded-xl border border-red-500/40 bg-red-950/40 p-4 text-sm text-red-100">
+        <pre className="overflow-auto rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
           {error}
         </pre>
       ) : null}
 
       {playerProfile ? (
-        <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-          <h2 className="text-xl font-semibold">Saved player</h2>
-          <p className="mt-2 text-slate-300">
+        <div className="rounded-xl border border-[#dbe3ef] bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-bold">Saved player</h2>
+          <p className="mt-2 font-semibold text-[#202d37]">
             {playerProfile.gameName}#{playerProfile.tagLine}
           </p>
-          <p className="mt-1 text-xs text-slate-500">{playerProfile.id}</p>
+          <p className="mt-1 text-xs text-[#758592]">{playerProfile.id}</p>
         </div>
       ) : null}
 
@@ -172,9 +178,9 @@ export default function SetupPage() {
 
 function Metric({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-      <p className="text-sm text-slate-400">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-white">{value}</p>
+    <div className="rounded-xl border border-[#dbe3ef] bg-white p-5 shadow-sm">
+      <p className="text-sm font-semibold text-[#758592]">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-[#202d37]">{value}</p>
     </div>
   );
 }

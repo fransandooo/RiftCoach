@@ -13,23 +13,25 @@ export default async function HomePage() {
   }
 
   return (
-    <section className="space-y-8">
-      <div className="rounded-3xl border border-cyan-500/20 bg-slate-900 p-8 shadow-2xl shadow-cyan-950/30">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300">
+    <section className="mx-auto max-w-5xl space-y-5 text-[#202d37]">
+      <div className="rounded-xl border border-[#dbe3ef] bg-white p-8 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5383e8]">
           Post-game League coach
         </p>
-        <h1 className="mt-4 text-5xl font-black tracking-tight">RiftCoach</h1>
-        <p className="mt-4 max-w-2xl text-lg text-slate-300">
+        <h1 className="mt-3 text-5xl font-black tracking-[-0.05em]">
+          RiftCoach
+        </h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-[#52616d]">
           Review recent matches, track competitive progress, inspect champion
           patterns, and convert recurring mistakes into focused practice goals.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div className="rounded-xl border border-[#dbe3ef] bg-white p-6 shadow-sm">
         <h2 className="text-xl font-bold">System status</h2>
-        <p className="mt-2 text-slate-300">
+        <p className="mt-2 text-[#52616d]">
           Backend status:{" "}
-          <span className="font-semibold text-cyan-300">{backendStatus}</span>
+          <span className="font-semibold text-[#5383e8]">{backendStatus}</span>
         </p>
       </div>
     </section>

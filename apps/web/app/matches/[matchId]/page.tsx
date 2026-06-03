@@ -6,9 +6,18 @@ export default async function MatchDetailPage({ params }: MatchPageProps) {
   const { matchId } = await params;
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-3xl font-bold">Match detail</h1>
-      <p className="text-slate-300">Phase 1 placeholder for match {matchId}.</p>
+    <section className="mx-auto max-w-5xl space-y-5 text-[#202d37]">
+      <div className="rounded-xl border border-[#dbe3ef] bg-white p-6 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5383e8]">
+          Match review
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-[-0.03em]">
+          Match detail
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#52616d]">
+          Placeholder for detailed review of match {matchId}.
+        </p>
+      </div>
     </section>
   );
 }
